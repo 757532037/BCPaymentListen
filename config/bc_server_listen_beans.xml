@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans default-lazy-init="false" default-dependency-check="none" >
+ 
+	<bean
+		class="org.jasypt.spring.properties.EncryptablePropertyPlaceholderConfigurer">
+		<constructor-arg ref="configurationEncryptor" />
+		<property name="locations">
+			<list>  
+                 <value>classpath:activeMq/activeMq.properties</value>  
+                 <value>classpath:db/jdbc.properties</value>  
+            </list>
+		</property>
+	</bean>
+	
+	<bean id="environmentVariablesConfiguration" class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+		<property name="algorithm"  value="PBEWithMD5AndDES"/>
+		<property name="passwordEnvName" value="APP_ENCRYPTION_PASSWORD"/>
+	</bean>
+	
+	<bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+		<property name="config" ref="environmentVariablesConfiguration" />
+	</bean>
+
+
+
+<bean id="listeningBC" class="com.bc.frame.obs.bcpay.ListeningBC" >
+	<property name="userName">
+		<value>${userName}</value>
+	</property>
+	<property name="password">
+		<value>${password}</value>
+	</property>
+	<property name="brokerURL">
+		<value>${brokerURL}</value>
+	</property>
+	<property name="rec_topic_recv">
+		<value>${rec_topic_recv}</value>
+	</property>
+	<property name="pub_topic_send">
+		<value>${pub_topic_send}</value>
+	</property>
+ </bean>
+<bean id="listeningCITIC" class="com.bc.frame.obs.citicpay.ListeningCITIC" >
+	<property name="userName">
+		<value>${userName}</value>
+	</property>
+	<property name="password">
+		<value>${password}</value>
+	</property>
+	<property name="brokerURL">
+		<value>${brokerURL}</value>
+	</property>
+	<property name="rec_topic_recv">
+		<value>${citic_rec_topic_recv}</value>
+	</property>
+	<property name="pub_topic_send">
+		<value>${citic_pub_topic_send}</value>
+	</property>
+ </bean>
+ 
+ 
+ <bean id="motloading" class="com.bc.frame.obs.Motloading" init-method="loadingListener">
+ 	<property name="listeningBC" ref="listeningBC"/>
+ 	<property name="listeningCITIC" ref="listeningCITIC"/>
+ </bean>
+ 
+
+	<bean id="appController" class="com.bc.main.Main" />
+
+	 <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="${c3p0.driverClass}" />
+		<property name="jdbcUrl" value="${c3p0.jdbcUrl}" />
+		<property name="user" value="${c3p0.user}" />
+		<property name="password" value="${c3p0.password}" />
+		<property name="maxPoolSize" value="${c3p0.maxPoolSize}" />
+        <property name="minPoolSize" value="${c3p0.minPoolSize}" />
+        <property name="initialPoolSize" value="${c3p0.initialPoolSize}"/>
+        <property name="maxIdleTime" value="${c3p0.maxIdleTime}" />
+	</bean>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="dbSource" class="com.bc.db.DbSource">
+		<property name="dataSource" ref="dataSource" />
+		<property name="idleSql" ref="idleSql" />
+	</bean>
+
+	<import resource="db/bc_server_listen_sql.xml"/>
+</beans>
+

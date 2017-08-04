@@ -1,0 +1,9 @@
+用于监听引擎的验码、撤销、和冲正等消息
+
+扩展：
+1.添加新需要监听的支付引擎需继承AbsObserver
+2.实现startlisten方法并按照com.bc.frame.obs.xxpay分包
+3.sql语句存放：bc_server_listen_sql.xml(增删改查需指定用户)
+	配置存放：bc_server_listen_beans.xml
+4.获取支付引擎消息需实现IobServerAction.notifyBank接口并按照com.bc.frame.obs.bcpay.advbank分包
+
